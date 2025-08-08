@@ -1,0 +1,154 @@
+#MainWindow {
+  background-color: transparent;
+}
+
+#MainFrame,
+#DateSelectionDialog,
+#DayDetailDialog {
+  background-color: #2d3748;
+  border-radius: 12px;
+  color: #e2e8f0;
+}
+
+
+#TimePanel {
+  background-color: #c53030;
+  border-radius: 12px;
+  color: #edf2f7;
+}
+#TimeLabel {
+  font-size: 22px;
+  font-weight: bold;
+}
+#TimeModeLabel {
+  font-size: 12px;
+}
+
+#DatePanel {
+  background-color: #4a5568;
+  border-radius: 12px;
+  color: #e2e8f0;
+}
+#DateLabel {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#TithiLabel {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+#EngDateLabel {
+  font-size: 11px;
+  color: #a0aec0;
+}
+
+
+#MinimizedWidget {
+  background-color: #4a5568;
+  border-radius: 10px;
+}
+#MinimizedNepMonth {
+  font-size: 14px;
+  color: #e2e8f0;
+}
+#MinimizedNepDay {
+  font-size: 32px;
+  font-weight: bold;
+  color: #f7fafc;
+}
+#MinimizedTime {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+
+#CalendarView {
+  background-color: #1a202c;
+  border: 1px solid #2d3748;
+  border-radius: 8px;
+  color: #e2e8f0;
+}
+#CalendarHeader,
+#EventHeader {
+  font-size: 16px;
+  font-weight: bold;
+  color: #e2e8f0;
+}
+#GregorianHeader {
+  font-size: 11px;
+  color: #a0aec0;
+}
+#CalendarWeekdayHeader {
+  font-size: 11px;
+  font-weight: bold;
+  color: #a0aec0;
+}
+
+.DayWidget {
+  border-radius: 4px;
+  padding: 2px;
+}
+.DayWidget[isHoliday="true"] {
+  background-color: #fd5858;
+}
+.DayWidget[isToday="true"] {
+  background-color: #38a169;
+  color: #1a202c;
+}
+.DayWidget[isToday="true"][isHoliday="true"] {
+  background-color: qlineargradient(
+    spread:pad,
+    x1:0, y1:0, x2:3, y2:3
+    stop:0 #28a745,
+    stop:0.1 #28a745,
+    stop:0.1 #fd5858,
+    stop:1 #fd5858
+  );
+  color: #f2f0ef;
+  padding: 2px;
+  border: 2px solid #38a169;
+  color: black;
+}
+.DayWidget:hover,
+.DayWidget[isHoliday="true"]:hover,
+.DayWidget[isToday="true"]:hover {
+  background-color: #b4f0ff;
+  color: black;
+}
+.DayWidget[isToday="true"][isHoliday="true"]:hover {
+  background: qlineargradient(
+    x1: 0, y1: 0,
+    x2: 1, y2: 1,
+    stop: 0 #38a169,
+    stop: 1 #fd5858
+  );
+  border: 0px;
+  color: #f2f0ef;
+}
+
+
+#EventListLabel {
+  font-size: 12px;
+  border-bottom: 1px solid #2d3748;
+  padding: 5px;
+}
+
+QPushButton {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  color: #e2e8f0;
+}
+QPushButton:hover {
+  background-color: #4a5568;
+}
+#SettingsButton,
+#CalendarHeaderButton {
+  border: none;
+  background-color: transparent;
+  text-align: center;
+}
