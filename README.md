@@ -9,7 +9,7 @@ A sophisticated, feature-rich desktop widget that displays the Nepali (Bikram Sa
 
 ## Screenshots
 
-<img width="5800" height="2250" alt="Nepali Calendar" src="https://github.com/user-attachments/assets/cfb4baed-4d7a-4dbb-b2de-195b7b00d70b" />
+<img width="5800" height="2250" alt="Image-Preview" src="https://github.com/user-attachments/assets/3214de63-c662-49e5-a4b1-71f1b0e91034" />
 
 ## Features
 
