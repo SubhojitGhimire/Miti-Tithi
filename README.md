@@ -50,7 +50,7 @@ pytz==2025.2
 ## Setup and Usage
 
 SETUP:  
-1. Ensure you have Python installed on your system. (Recommended ![Python 3.10.10](https://www.python.org/downloads/release/python-31010/))
+1. Ensure you have Python installed on your system. (Recommended <a href="https://www.python.org/downloads/release/python-31010/">Python 3.10.10</a>)
 2. Download this Repository. Unzip it.
 3. Run setup.exe.bat file as administrator. (Right-click -> Show More Options -> Run As Administrator)  
 All Set! Restart your PC and the widget will appear automatically!
