@@ -47,7 +47,13 @@ pywin32==311
 pytz==2025.2
 ```
 
-## Usage
+## Setup and Usage
+
+SETUP:  
+1. Ensure you have Python installed on your system. (Recommended ![Python 3.10.10](https://www.python.org/downloads/release/python-31010/))
+2. Download this Repository. Unzip it.
+3. Run setup.exe.bat file as administrator. (Right-click -> Show More Options -> Run As Administrator)  
+All Set! Restart your PC and the widget will appear automatically!
 
 To run the application on-demand, simply execute the main.py script from the root directory: ```python main.py```
 
