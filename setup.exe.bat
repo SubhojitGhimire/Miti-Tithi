@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM === 1. Install dependencies ===
 echo Installing dependencies...
-echo pip install --upgrade --force-reinstall -r requirements.txt
+pip install --upgrade --force-reinstall -r requirements.txt
 
 REM === 2. Get Startup folder path ===
 for /f "tokens=*" %%i in ('powershell -command "[Environment]::GetFolderPath('Startup')"') do set startupPath=%%i
@@ -11,7 +11,7 @@ for /f "tokens=*" %%i in ('powershell -command "[Environment]::GetFolderPath('St
 echo Startup folder detected: %startupPath%
 
 REM === 3. Define project folder name and install location ===
-set projectName=Miti-Tithi
+set projectName=Miti-Tithi-main
 set installDir=C:\Program Files\%projectName%
 set currentDir=%~dp0
 
@@ -36,3 +36,4 @@ cscript //nologo "%startupPath%\mitiTithi.vbs"
 
 echo Setup complete. Your project is installed in Program Files and will run on startup.
 pause
+
