@@ -158,11 +158,3 @@ class CalendarScraper:
         except Exception as e:
             print(f"Failed to scrape {month_name} {year}: {e}")
             return {}
-    
-
-                    
-                    
-        
-
-        
-    

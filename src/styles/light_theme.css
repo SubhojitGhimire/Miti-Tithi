@@ -31,7 +31,7 @@
 #DateLabel {
   font-size: 16px;
   font-weight: bold;
-  color: #000
+  color: #000;
 }
 
 #TithiLabel {
@@ -43,7 +43,6 @@
   font-size: 11px;
   color: #212121;
 }
-
 
 #MinimizedWidget {
   background-color: #f2f0ef;
@@ -62,7 +61,6 @@
   font-size: 12px;
   color: #212121;
 }
-
 
 #CalendarView {
   background-color: #f2f0ef;
@@ -103,12 +101,15 @@
 }
 .DayWidget[isToday="true"][isHoliday="true"] {
   background-color: qlineargradient(
-    spread:pad,
-    x1:0, y1:0, x2:3, y2:3
-    stop:0 #28a745,
-    stop:0.1 #28a745,
-    stop:0.1 #fd5858,
-    stop:1 #fd5858
+    spread: pad,
+    x1: 0,
+    y1: 0,
+    x2: 3,
+    y2: 3,
+    stop: 0 #28a745,
+    stop: 0.1 #28a745,
+    stop: 0.1 #fd5858,
+    stop: 1 #fd5858
   );
   color: #f2f0ef;
   padding: 2px;
@@ -122,8 +123,10 @@
 }
 .DayWidget[isToday="true"][isHoliday="true"]:hover {
   background: qlineargradient(
-    x1: 0, y1: 0,
-    x2: 1, y2: 1,
+    x1: 0,
+    y1: 0,
+    x2: 1,
+    y2: 1,
     stop: 0 #38a169,
     stop: 1 #fd5858
   );
@@ -140,12 +143,16 @@
   color: #333;
 }
 
-
 #EventListLabel {
   font-size: 12px;
   border-bottom: 1px solid #eee;
   padding: 5px;
   color: #f2f0ef;
+}
+#TodaysEvents {
+  font-size: 14px;
+  font-weight: bold;
+  color: #2d3748;
 }
 
 QPushButton {
@@ -165,4 +172,8 @@ QPushButton:hover {
   background-color: transparent;
   text-align: center;
   color: #333;
+}
+
+#MainFrame[isHolidayToday="true"] {
+  border: 2px solid #c7524b;
 }

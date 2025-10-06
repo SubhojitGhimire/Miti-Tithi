@@ -12,6 +12,7 @@ class SettingsManager:
         
         os.makedirs(self.settings_dir, exist_ok=True)
         self.settings_file = os.path.join(self.settings_dir, "settings.json")
+        self.reminders_file = os.path.join(self.settings_dir, "reminders.json")
         self.app_name = app_name
         self.settings = self._load_settings()
 
@@ -21,7 +22,12 @@ class SettingsManager:
             "theme": "Light",
             "sync_start_year": 2070,
             "sync_end_year": 2090,
-            "widget_position": None
+            "widget_position": None,
+            "widget_placement": "Bottom-Right",
+            "resizing_enabled": False,
+            "widget_size": [260, 80],
+            "minimized_size": [80, 80],
+            "calendar_size": [800, 550]
         }
 
     def _load_settings(self):
@@ -45,29 +51,52 @@ class SettingsManager:
         self.settings[key] = value
         self.save_settings()
 
+    def load_reminders(self):
+        try:
+            with open(self.reminders_file, 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def save_reminders(self, reminders):
+        with open(self.reminders_file, 'w') as f:
+            json.dump(reminders, f, indent=4)
+    
     def set_startup(self, enable):
         if platform.system() != "Windows":
             print("Run on startup is only supported on Windows.")
             return
 
         import winreg
-        
-        app_path = os.path.abspath(sys.argv[0])
-        run_command = f'"{sys.executable}" "{app_path}"'
+        if getattr(sys, 'frozen', False):
+            app_path = sys.executable
+            run_command = f'"{app_path}"'
+        else:
+            app_path = os.path.abspath(sys.argv[0])
+            run_command = f'"{sys.executable}" "{app_path}"'
+
         key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
         
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
                 if enable:
                     winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, run_command)
+                    print(f"Added to startup: {run_command}")
                 else:
                     winreg.DeleteValue(key, self.app_name)
+                    print("Removed from startup.")
             self.set("run_on_startup", enable)
         except FileNotFoundError:
-             if not enable:
-                 print("Already removed from startup or key not found.")
-             else:
-                 print("Error: Could not find the startup registry key.")
+            if not enable:
+                print("Already removed from startup or key not found.")
+            else:
+                try:
+                    with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+                        if enable:
+                            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, run_command)
+                            print(f"Created Run key and added to startup: {run_command}")
+                            self.set("run_on_startup", enable)
+                except Exception as e:
+                    print(f"Failed to create startup key: {e}")
         except Exception as e:
             print(f"Failed to set startup preference: {e}")
-
