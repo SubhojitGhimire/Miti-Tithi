@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM === 1. Install dependencies ===
 echo Installing dependencies...
-pip install --upgrade --force-reinstall requests==2.32.4 beautifulsoup4==4.13.4 PySide6==6.9.1 pywin32==311 pytz==2025.2
+pip install --upgrade --force-reinstall requests==2.32.4 beautifulsoup4==4.13.4 PySide6==6.9.1 pywin32==311 pytz==2025.2 python-dateutil==2.9.0.post0
 
 REM === 2. Get Startup folder path ===
 for /f "tokens=*" %%i in ('powershell -command "[Environment]::GetFolderPath('Startup')"') do set startupPath=%%i
