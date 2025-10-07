@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Version](https://img.shields.io/badge/MitiTithi-v2.0.0-blue)
+![Version](https://img.shields.io/badge/MitiTithi-v2.0.0-orange)
 
 A sophisticated, feature-rich desktop widget that displays the Nepali (Bikram Sambat) date, Tithi, and upcoming events directly on your Windows desktop. Built with Python and PySide6, this application is designed to be both beautiful and functional, featuring a polished UI, smooth animations, and an offline-first data architecture.
 
