@@ -1,23 +1,26 @@
+import re
+import os
 import sys
 import json
 import pytz
-import platform
 import uuid
-from PySide6.QtWidgets import QStyle
+import platform
+import requests
+
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-
 
 from src.data_manager import DataManager
 from src.settings_manager import SettingsManager
 
-from PySide6.QtCore import Qt, QTimer, QPoint, QThread, Signal, QSize, QDate, QTime
-from PySide6.QtGui import QIcon, QAction, QScreen, QPainter, QColor, QFont, QMouseEvent, QCursor
+from PySide6.QtWidgets import QStyle
+from PySide6.QtCore import Qt, QTimer, QPoint, QThread, Signal, QSize, QDate, QTime, QObject
+from PySide6.QtGui import QIcon, QAction, QScreen, QPainter, QColor, QFont, QMouseEvent, QCursor, QPixmap
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                 QFrame, QSystemTrayIcon, QMenu, QDialog, QDialogButtonBox,
                                 QComboBox, QGridLayout, QScrollArea, QPushButton, QListWidget,
                                 QListWidgetItem, QSpinBox, QCheckBox, QStyle, QSizeGrip, QTabWidget,
-                                QDateEdit, QMessageBox, QLineEdit, QTimeEdit)
+                                QDateEdit, QMessageBox, QLineEdit, QTimeEdit, QTextEdit)
 
 try:
     with open("src/styles/light_theme.css", "r") as f:
@@ -38,7 +41,6 @@ class DayWidget(QFrame):
         self.setObjectName("DayWidget")
         self.setProperty("isHoliday", day_data.get("is_holiday", False))
         self.setProperty("isToday", day_data.get("is_today", False))
-
         self.setCursor(QCursor(Qt.PointingHandCursor))
 
         layout = QVBoxLayout(self)
@@ -108,7 +110,6 @@ class DateSelectionDialog(QDialog):
         self.setWindowTitle("Select Date")
         
         layout = QGridLayout(self)
-        
         layout.addWidget(QLabel("Year (B.S.):"), 0, 0)
         self.year_combo = QComboBox()
         years = [str(y) for y in range(2000, 2101)]
@@ -520,6 +521,136 @@ class RemindersDialog(QDialog):
     def get_updated_reminders(self):
         return self.reminders
 
+class UpdateChecker(QObject):
+    finished = Signal(str)
+
+    def run(self):
+        try:
+            local_version = self._get_version_from_readme()
+            if not local_version:
+                self.finished.emit("Could not determine local version.")
+                return
+
+            url = "https://raw.githubusercontent.com/SubhojitGhimire/Miti-Tithi/main/README.md"
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            
+            remote_content = response.text
+            remote_version = self._parse_version(remote_content)
+
+            if not remote_version:
+                self.finished.emit("Could not determine remote version.")
+            elif remote_version == local_version:
+                self.finished.emit(f"You are up to date! (Version {local_version})")
+            else:
+                self.finished.emit(f"A new version {remote_version} is available! Please visit the GitHub page to download and run the new setup.")
+
+        except requests.exceptions.RequestException as e:
+            self.finished.emit("Error: Could not connect to check for updates.")
+        except Exception as e:
+            self.finished.emit(f"An unexpected error occurred: {e}")
+
+    def _get_version_from_readme(self):
+        try:
+            with open("README.md", "r", encoding="utf-8") as f:
+                return self._parse_version(f.read())
+        except FileNotFoundError:
+            return None
+
+    def _parse_version(self, content):
+        match = re.search(r"MitiTithi-(v[\d\.]+)-orange", content)
+        return match.group(1) if match else None
+
+class AboutDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("About MitiTithi")
+        self.setMinimumWidth(450)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setSpacing(10)
+        
+        header_layout = QHBoxLayout()
+        icon_label = QLabel()
+        pixmap = QPixmap("src/ui/icon.png").scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon_label.setPixmap(pixmap)
+        
+        title_layout = QVBoxLayout()
+        title_label = QLabel("MitiTithi")
+        title_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        
+        version_layout = QHBoxLayout()
+        self.version_label = QLabel(self._get_version_from_readme())
+        self.update_button = QPushButton("Check for Updates")
+        self.update_button.clicked.connect(self._check_for_updates)
+        version_layout.addWidget(self.version_label)
+        version_layout.addWidget(self.update_button)
+        version_layout.addStretch()
+
+        title_layout.addWidget(title_label)
+        title_layout.addLayout(version_layout)
+        
+        header_layout.addWidget(icon_label)
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+        main_layout.addLayout(header_layout)
+
+        home_label = QLabel('<b>Home:</b> <a href="https://github.com/SubhojitGhimire/Miti-Tithi/">https://github.com/SubhojitGhimire/Miti-Tithi/</a>')
+        home_label.setOpenExternalLinks(True)
+        main_layout.addWidget(home_label)
+
+        license_box = QTextEdit()
+        license_box.setReadOnly(True)
+        license_box.setStyleSheet("QTextEdit { background-color: #ffffff; color: #000000; border: 1px solid #ccc; }")
+        license_text = self._get_mit_license_text()
+        license_box.setText(license_text)
+        license_box.setFixedHeight(150)
+        main_layout.addWidget(license_box)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok)
+        button_box.accepted.connect(self.accept)
+        main_layout.addWidget(button_box)
+
+        self.update_thread = None
+        self.update_worker = None
+
+    def _check_for_updates(self):
+        self.update_button.setText("Checking...")
+        self.update_button.setEnabled(False)
+
+        self.update_thread = QThread()
+        self.update_worker = UpdateChecker()
+        self.update_worker.moveToThread(self.update_thread)
+        self.update_worker.finished.connect(self._on_update_check_finished)
+        self.update_thread.started.connect(self.update_worker.run)
+        self.update_thread.start()
+
+    def _on_update_check_finished(self, message):
+        QMessageBox.information(self, "Update Check", message)
+        self.update_button.setText("Check for Updates")
+        self.update_button.setEnabled(True)
+        self.update_thread.quit()
+        self.update_thread.wait()
+
+    def _get_version_from_readme(self):
+        try:
+            with open("README.md", "r", encoding="utf-8") as f: content = f.read()
+            match = re.search(r"MitiTithi-(v[\d\.]+)-orange", content)
+            if match: return match.group(1)
+        except Exception: pass
+        return "v2.0.0"
+
+    def _get_mit_license_text(self):
+        return """MIT License
+
+Copyright (c) 2025 Subhojit Ghimire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."""
+
 class MainWindow(QMainWindow):
     start_sync_signal = Signal(int, int, bool)
     theme_changed = Signal()
@@ -887,6 +1018,18 @@ class MainWindow(QMainWindow):
         self.tray_icon.hide()
         QApplication.instance().quit()
     
+    def show_about_dialog(self):
+        dialog = AboutDialog(self)
+        dialog.setStyleSheet(self.styleSheet())
+        dialog.exec()
+    
+    def show_and_center_widget(self):
+        self.set_view_mode('widget')
+        self.show()
+        self.raise_()
+        self.activateWindow()
+        self.center_window()
+    
     def toggle_event_widget(self):
         if self.event_widget and self.event_widget.isVisible():
             self.event_widget.close()
@@ -944,13 +1087,19 @@ class MainWindow(QMainWindow):
         icon_path = "src/ui/icon.png"
         self.tray_icon = QSystemTrayIcon(QIcon(icon_path), self)
         menu = QMenu()
+
         show_action = QAction("Show Widget", self)
-        show_action.triggered.connect(self.showNormal)
+        show_action.triggered.connect(self.show_and_center_widget)
+        settings_action = QAction("Settings...", self)
+        settings_action.triggered.connect(self.open_settings)
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(self.quit_application)
+        
         menu.addAction(show_action)
+        menu.addAction(settings_action)
         menu.addSeparator()
         menu.addAction(quit_action)
+        
         self.tray_icon.setContextMenu(menu)
         self.tray_icon.show()
     
@@ -984,7 +1133,7 @@ class MainWindow(QMainWindow):
         else:
             self.size_grip.hide()
         self.set_view_mode('widget' if not self.is_maximized_mode and not self.is_minimized_mode else
-                        'minimized' if self.is_minimized_mode else 'calendar')
+                            'minimized' if self.is_minimized_mode else 'calendar')
     
     def open_settings(self):
         dialog = SettingsDialog(self.settings_manager, self)
@@ -1044,6 +1193,7 @@ class MainWindow(QMainWindow):
         
         sync_action = menu.addAction("Force Resync")
         settings_action = menu.addAction("Settings...")
+        about_action = menu.addAction("About MitiTithi...")
         menu.addSeparator()
         show_today_action = menu.addAction("Show Today")
         toggle_events_text = "Hide Events Box" if self.is_event_panel_visible else "Show Events Box"
@@ -1059,6 +1209,8 @@ class MainWindow(QMainWindow):
             self.trigger_sync(force=True)
         elif action == settings_action: 
             self.open_settings()
+        elif action == about_action:
+            self.show_about_dialog()
         elif action == show_today_action:
             self.jump_to_today()
         elif action == toggle_events_action:

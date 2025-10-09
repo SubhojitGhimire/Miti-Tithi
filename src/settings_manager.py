@@ -4,7 +4,7 @@ import json
 import platform
 
 class SettingsManager:
-    def __init__(self, app_name="NepaliCalendarDesktopWidget"):
+    def __init__(self, app_name="MitiTithi-DesktopWidget"):
         if platform.system() == "Windows":
             self.settings_dir = os.path.join(os.environ['APPDATA'], app_name)
         else:
@@ -19,11 +19,11 @@ class SettingsManager:
     def _get_default_settings(self):
         return {
             "run_on_startup": False,
-            "theme": "Light",
-            "sync_start_year": 2070,
-            "sync_end_year": 2090,
+            "theme": "Dark",
+            "sync_start_year": 2083,
+            "sync_end_year": 2085,
             "widget_position": None,
-            "widget_placement": "Bottom-Right",
+            "widget_placement": "Free",
             "resizing_enabled": False,
             "widget_size": [260, 80],
             "minimized_size": [80, 80],
